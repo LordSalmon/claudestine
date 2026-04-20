@@ -1,2 +1,2 @@
-workspace_identifier = "self"
-ignore_files = [".gitignore"]
+workspace_identifier = "claudestine"
+ignore_files = []

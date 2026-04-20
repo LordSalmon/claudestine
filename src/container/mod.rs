@@ -6,8 +6,9 @@ use std::{
     env::current_dir, os::unix::process::CommandExt, path::PathBuf, process::Command, str::FromStr,
 };
 
-use anyhow::{Result, anyhow};
+use anyhow::{Result, anyhow, ensure};
 use log::info;
+use serde::de::IntoDeserializer;
 
 use crate::{
     config::Config,
@@ -24,7 +25,7 @@ impl<'a> Container<'a> {
         Self { config, debug }
     }
 
-    pub fn build(&self) {
+    pub fn build(&self) -> Result<()> {
         info!("Building Dockerfile...");
         let build_command = Command::new("docker")
             .arg("build")
@@ -49,6 +50,7 @@ impl<'a> Container<'a> {
                 .for_each(|l| info!("{}", l));
         }
         info!("Built Dockerfile");
+        Ok(())
     }
 
     pub fn start(&self) -> Result<()> {
@@ -57,6 +59,15 @@ impl<'a> Container<'a> {
             self.config
                 .ignore_files
                 .iter()
+                .chain(
+                    Some(
+                        &Config::default_isolates_path()
+                            .to_str()
+                            .unwrap()
+                            .to_string(),
+                    )
+                    .into_iter(),
+                )
                 .map(|i| parse_ignore_rule_set(PathBuf::from_str(i).unwrap()))
                 .collect(),
         );

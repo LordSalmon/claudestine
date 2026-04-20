@@ -1,9 +1,7 @@
-FROM oven/bun:latest AS installer
-USER bun
-RUN bun install --global @anthropic-ai/claude-code
-
 FROM ubuntu:22.04
-COPY --from=installer /home/bun/.bun/install/global/node_modules/@anthropic-ai/claude-code-linux-x64/claude /usr/local/bin/claude
-ENV HOME=/root
+RUN apt update && apt upgrade -y
+RUN apt install curl -y
+RUN curl -fsSL https://claude.ai/install.sh | bash
+RUN cp /root/.local/bin/claude /usr/bin/claude
 WORKDIR /usr/src/claudestine
-ENTRYPOINT ["claude"]
+ENTRYPOINT [ "claude" ]

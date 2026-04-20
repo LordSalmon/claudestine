@@ -21,16 +21,20 @@ impl Config {
         debug!("{:#?}", self);
     }
 
-    fn config_path() -> PathBuf {
+    pub fn config_file_path() -> PathBuf {
+        Self::config_directory().join("config.toml")
+    }
+
+    pub fn config_directory() -> PathBuf {
         Path::new(".claudestine").to_path_buf()
     }
 
-    fn config_file_path() -> PathBuf {
-        Self::config_path().join("config.toml")
+    pub fn default_dockerfile_path() -> PathBuf {
+        Self::config_directory().join("Dockerfile")
     }
 
-    fn default_dockerfile_path() -> PathBuf {
-        Self::config_path().join("Dockerfile")
+    pub fn default_isolates_path() -> PathBuf {
+        Self::config_directory().join("isolates")
     }
 
     pub fn dockerfile_path(&self) -> PathBuf {

@@ -1,3 +1,10 @@
+use std::{
+    env::current_dir,
+    fs::{self, create_dir, remove_dir, remove_dir_all},
+    path::Path,
+};
+
+use anyhow::ensure;
 use log::{error, info};
 mod config;
 mod container;
@@ -22,6 +29,10 @@ enum Command {
     Run {
         #[arg(long, default_value_t = false)]
         debug: bool,
+    },
+    Init {
+        #[arg(long, default_value_t = false)]
+        force: bool,
     },
 }
 
@@ -48,10 +59,49 @@ fn main() {
             if let Ok(config) = Config::init() {
                 info!("Welcome to claudestine!");
                 let container = Container::new(&config, debug);
-                container.build();
-                container.start().unwrap();
+                if let Ok(()) = container.build() {
+                    container.start().unwrap()
+                } else {
+                    error!("Couldn't build the container. Try running it with --debug");
+                }
             } else {
                 error!("Couldn't initialize the configuration");
+            }
+        }
+        Command::Init { force } => {
+            if Config::config_directory().exists() {
+                if !force {
+                    info!("Claudestine is already initialized. Skipping...");
+                    return;
+                } else {
+                    remove_dir_all(Config::config_directory()).unwrap();
+                    create_dir(Config::config_directory()).unwrap();
+                }
+            } else {
+                create_dir(Config::config_directory()).unwrap();
+            }
+            if let Some(project_identifier) = current_dir().unwrap().file_name() {
+                fs::write(
+                    Config::config_file_path(),
+                    format!(
+                        "workspace_identifier = \"{}\"\nignore_files = []",
+                        project_identifier.to_str().unwrap()
+                    ),
+                )
+                .map_err(|_| "Couldn't write to config file.")
+                .unwrap();
+                fs::write(
+                    Config::default_dockerfile_path(),
+                    include_bytes!("../assets/Dockerfile"),
+                )
+                .map_err(|_| "Couldn't write to Dockerfile.")
+                .unwrap();
+                fs::write(Config::default_isolates_path(), "")
+                    .map_err(|_| "Couldn't create the isolates file.")
+                    .unwrap();
+                info!("Claudestine successfully initialized.")
+            } else {
+                error!("Couldn't read the current directories name");
             }
         }
     }
