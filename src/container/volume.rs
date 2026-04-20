@@ -39,16 +39,15 @@ pub fn volume_mappings_by_ignore_rule_sets(
             .iter()
             .flat_map(|rs| rs.rules.iter().flat_map(|r| mapping_by_ignore_rule(r))),
     );
-    // mappings.iter().filter(|mapping| {
-    //     let duplicate_mappings = mappings.iter().filter(|m| {
-    //         if let Some(source) = &m.source {
-    //             &source.to_str() == &mapping.destination.to_str()
-    //         } else {
-    //             false
-    //         }
-    //     });
-    //     // todo, remove when there is another mapping with the same destination and the current destination is /dev/null.
-    // });
+    let real_destinations: std::collections::HashSet<PathBuf> = mappings
+        .iter()
+        .filter(|m| m.source.is_some() && m.source.as_deref() != Some(empty_file_mount().as_path()))
+        .map(|m| m.destination.clone())
+        .collect();
+    mappings.retain(|m| {
+        m.source.as_deref() != Some(empty_file_mount().as_path())
+            || !real_destinations.contains(&m.destination)
+    });
     mappings
 }
 
