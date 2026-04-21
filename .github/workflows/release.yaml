@@ -32,7 +32,7 @@ jobs:
 
       - name: Build
         run: |
-          cargo build --release --target x86_64-unknown-linux-musl --bin claudestineer
+          cargo build --release --target x86_64-unknown-linux-musl --bin claudestine
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -40,7 +40,7 @@ jobs:
           name: musl
           retention-days: 1
           path: |
-            target/x86_64-unknown-linux-musl/release/claudestineer
+            target/x86_64-unknown-linux-musl/release/claudestine
 
   build-darwin:
     runs-on: macos-26
@@ -58,7 +58,7 @@ jobs:
       - name: Build
         run: |
           export CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
-          cargo build --release --target aarch64-apple-darwin --bin claudestineer
+          cargo build --release --target aarch64-apple-darwin --bin claudestine
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -66,7 +66,7 @@ jobs:
           name: darwin
           retention-days: 1
           path: |
-            target/aarch64-apple-darwin/release/claudestineer
+            target/aarch64-apple-darwin/release/claudestine
 
   release:
     runs-on: ubuntu-22.04
