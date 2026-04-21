@@ -1,4 +1,4 @@
-name: release
+name: "Release"
 
 on:
   push:
@@ -9,9 +9,7 @@ env:
   CARGO_INCREMENTAL: 0
   CARGO_NET_RETRY: 10
   RUSTUP_MAX_RETRIES: 10
-  FETCH_DEPTH: 0 # pull in the tags for the version string
   GH_TOKEN: ${{ github.token }}
-  CARGO_TERM_COLOR: always
 
 jobs:
   build-musl:
@@ -21,7 +19,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: ${{ env.FETCH_DEPTH }}
           ref: ${{ env.GITHUB_REF }}
 
       - name: Install target toolchain
@@ -35,8 +32,7 @@ jobs:
 
       - name: Build
         run: |
-          export CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
-          cargo build --release --target x86_64-unknown-linux-musl --bin claudestine
+          cargo build --release --target x86_64-unknown-linux-musl --bin claudestineer
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -44,12 +40,39 @@ jobs:
           name: musl
           retention-days: 1
           path: |
-            target/x86_64-unknown-linux-musl/release/claudestine
+            target/x86_64-unknown-linux-musl/release/claudestineer
+
+  build-darwin:
+    runs-on: macos-26
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.GITHUB_REF }}
+
+      - name: Install target toolchain
+        run: |
+          rustup target add aarch64-apple-darwin
+
+      - name: Build
+        run: |
+          export CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
+          cargo build --release --target aarch64-apple-darwin --bin claudestineer
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: darwin
+          retention-days: 1
+          path: |
+            target/aarch64-apple-darwin/release/claudestineer
 
   release:
     runs-on: ubuntu-22.04
     needs:
       - build-musl
+      - build-darwin
 
     permissions:
       contents: write
@@ -61,9 +84,10 @@ jobs:
 
       - name: Rename Files
         run: |
-          mv musl/claudestine claudestine-linux-x86_64
+          mv musl/claudestineer linux-claudestine && \
+          mv darwin/claudestineer macos-claudestine
 
       - name: Create Release
         run: |
           gh release --repo LordSalmon/claudestine create "$GITHUB_REF_NAME" \
-            claudestine-linux-x86_64 --title "$GITHUB_REF_NAME"
+            macos-claudestine linux-claudestine --title "$GITHUB_REF_NAME"
