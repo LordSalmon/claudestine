@@ -84,8 +84,8 @@ jobs:
 
       - name: Rename Files
         run: |
-          mv musl/claudestineer linux-claudestine && \
-          mv darwin/claudestineer macos-claudestine
+          mv musl/claudestine linux-claudestine && \
+          mv darwin/claudestine macos-claudestine
 
       - name: Create Release
         run: |
