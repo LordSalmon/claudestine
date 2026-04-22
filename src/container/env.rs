@@ -62,7 +62,7 @@ pub fn security_token_env<'a>() -> Result<Option<EnvRecord<'a>>> {
         return Ok(None);
     }
 
-    let json = String::from_utf8(output.stdout.clone())?;
+    let json = String::from_utf8(output.clone().stdout.clone())?;
     let parsed_oauth_credentials: MacosClaudeSecret = serde_json::from_str(json.as_str())?;
 
     Ok(Some(EnvRecord {
@@ -84,7 +84,7 @@ pub fn security_token_env2<'a>() -> Result<Option<EnvRecord<'a>>> {
         ])
         .output()?;
 
-    dbg!(String::from_utf8(output.stdout.clone()).unwrap());
+    dbg!(String::from_utf8(output.clone().stdout.clone()).unwrap());
 
     if !output.status.success() {
         return Ok(None);
