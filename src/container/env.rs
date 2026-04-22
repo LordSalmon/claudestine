@@ -68,8 +68,8 @@ pub fn security_token_env<'a>() -> Result<Option<EnvRecord<'a>>> {
 
     Ok(Some(EnvRecord {
         name: "ANTHROPIC_API_KEY",
-        host: HostEnvVariable::Reference {
-            name: parsed_oauth_credentials.claude_ai_oauth.access_token,
+        host: HostEnvVariable::Value {
+            value: parsed_oauth_credentials.claude_ai_oauth.access_token,
         },
     }))
 }
