@@ -48,25 +48,15 @@ pub fn security_token_env<'a>() -> Result<Option<EnvRecord<'a>>> {
 #[cfg(target_os = "macos")]
 pub fn security_token_env<'a>() -> Result<Option<EnvRecord<'a>>> {
     let output = Command::new("security")
-        .args([
-            "find-generic-password",
-            "-s",
-            "\"Claude Code-credentials\"",
-            "-w",
-            "||",
-            "5",
-        ])
+        .args(["find-generic-password", "-s", "Claude Code-credentials", "-w"])
         .output()?;
 
-    dbg!(String::from_utf8(output.clone().stdout.clone()).unwrap());
-    return Ok(None);
+    if !output.status.success() {
+        return Ok(None);
+    }
 
-    // if !output.status.success() {
-    //     return Ok(None);
-    // }
-
-    let json = String::from_utf8(output.clone().stdout.clone())?;
-    let parsed_oauth_credentials: MacosClaudeSecret = serde_json::from_str(json.as_str())?;
+    let json = String::from_utf8(output.stdout)?;
+    let parsed_oauth_credentials: MacosClaudeSecret = serde_json::from_str(json.trim())?;
 
     Ok(Some(EnvRecord {
         name: "ANTHROPIC_API_KEY",
@@ -78,22 +68,15 @@ pub fn security_token_env<'a>() -> Result<Option<EnvRecord<'a>>> {
 
 pub fn security_token_env2<'a>() -> Result<Option<EnvRecord<'a>>> {
     let output = Command::new("security")
-        .args([
-            "find-generic-password",
-            "-s",
-            "\"Claude Code-credentials\"",
-            "-w",
-        ])
+        .args(["find-generic-password", "-s", "Claude Code-credentials", "-w"])
         .output()?;
-
-    dbg!(String::from_utf8(output.clone().stdout.clone()).unwrap());
 
     if !output.status.success() {
         return Ok(None);
     }
 
     let json = String::from_utf8(output.stdout)?;
-    let parsed_oauth_credentials: MacosClaudeSecret = serde_json::from_str(json.as_str())?;
+    let parsed_oauth_credentials: MacosClaudeSecret = serde_json::from_str(json.trim())?;
 
     Ok(Some(EnvRecord {
         name: "ANTHROPIC_API_KEY",
