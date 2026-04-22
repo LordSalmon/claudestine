@@ -56,7 +56,7 @@ pub fn security_token_env<'a>() -> Result<Option<EnvRecord<'a>>> {
         ])
         .output()?;
 
-    dbg!(output.stdout);
+    dbg!(String::from_utf8(output.stdout).unwrap());
 
     if !output.status.success() {
         return Ok(None);
