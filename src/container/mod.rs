@@ -61,6 +61,8 @@ impl<'a> Container<'a> {
                 None
             }
         }];
+        let tmp = security_token_env().unwrap().unwrap().serialize();
+        dbg!(tmp);
         info!("Starting Claudestine...");
         let mappings = volume_mappings_by_ignore_rule_sets(
             self.config
@@ -88,7 +90,7 @@ impl<'a> Container<'a> {
             .arg("TERM=xterm-256color");
         for environment_mapping in environment_records.iter().flatten() {
             command_builder
-                .arg("--environment")
+                .arg("--env")
                 .arg(environment_mapping.serialize());
         }
         for rule in mappings {
