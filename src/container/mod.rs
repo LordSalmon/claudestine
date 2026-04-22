@@ -1,4 +1,4 @@
-mod env;
+pub mod env;
 mod ignore;
 mod volume;
 
@@ -61,8 +61,9 @@ impl<'a> Container<'a> {
                 None
             }
         }];
-        let tmp = security_token_env().unwrap().unwrap().serialize();
-        dbg!(tmp);
+        if let Some(o) = security_token_env().unwrap() {
+            dbg!(o.serialize());
+        }
         info!("Starting Claudestine...");
         let mappings = volume_mappings_by_ignore_rule_sets(
             self.config
