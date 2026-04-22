@@ -67,7 +67,7 @@ pub fn security_token_env<'a>() -> Result<Option<EnvRecord<'a>>> {
     let parsed_oauth_credentials: MacosClaudeSecret = serde_json::from_str(json.trim())?;
 
     Ok(Some(EnvRecord {
-        name: "ANTHROPIC_API_KEY",
+        name: "CLAUDE_CODE_OAUTH_TOKEN",
         host: HostEnvVariable::Value {
             value: parsed_oauth_credentials.claude_ai_oauth.access_token,
         },
