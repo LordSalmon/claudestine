@@ -61,7 +61,7 @@ pub fn security_token_env<'a>() -> Result<Option<EnvRecord<'a>>> {
     }
 
     let json = String::from_utf8(output.stdout)?;
-    dbg!(json);
+    dbg!(json.clone());
     let parsed_oauth_credentials: MacosClaudeSecret = serde_json::from_str(json.trim())?;
 
     Ok(Some(EnvRecord {
