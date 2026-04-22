@@ -56,6 +56,8 @@ pub fn security_token_env<'a>() -> Result<Option<EnvRecord<'a>>> {
         ])
         .output()?;
 
+    dbg!(output.stdout);
+
     if !output.status.success() {
         return Ok(None);
     }
