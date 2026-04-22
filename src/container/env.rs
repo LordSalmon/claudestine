@@ -48,7 +48,12 @@ pub fn security_token_env<'a>() -> Result<Option<EnvRecord<'a>>> {
 #[cfg(target_os = "macos")]
 pub fn security_token_env<'a>() -> Result<Option<EnvRecord<'a>>> {
     let output = Command::new("security")
-        .args(["find-generic-password", "-s", "Claude Code-credentials", "-w"])
+        .args([
+            "find-generic-password",
+            "-s",
+            "Claude Code-credentials",
+            "-w",
+        ])
         .output()?;
 
     if !output.status.success() {
@@ -56,6 +61,7 @@ pub fn security_token_env<'a>() -> Result<Option<EnvRecord<'a>>> {
     }
 
     let json = String::from_utf8(output.stdout)?;
+    dbg!(json);
     let parsed_oauth_credentials: MacosClaudeSecret = serde_json::from_str(json.trim())?;
 
     Ok(Some(EnvRecord {
@@ -68,7 +74,12 @@ pub fn security_token_env<'a>() -> Result<Option<EnvRecord<'a>>> {
 
 pub fn security_token_env2<'a>() -> Result<Option<EnvRecord<'a>>> {
     let output = Command::new("security")
-        .args(["find-generic-password", "-s", "Claude Code-credentials", "-w"])
+        .args([
+            "find-generic-password",
+            "-s",
+            "Claude Code-credentials",
+            "-w",
+        ])
         .output()?;
 
     if !output.status.success() {
