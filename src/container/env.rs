@@ -26,6 +26,7 @@ impl<'a> EnvRecord<'a> {
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct ClaudeOAuth {
     access_token: String,
     refresh_token: String,
@@ -36,6 +37,7 @@ struct ClaudeOAuth {
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct MacosClaudeSecret {
     claude_ai_oauth: ClaudeOAuth,
 }
