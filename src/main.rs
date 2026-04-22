@@ -1,10 +1,8 @@
 use std::{
     env::current_dir,
-    fs::{self, create_dir, remove_dir, remove_dir_all},
-    path::Path,
+    fs::{self, create_dir, remove_dir_all},
 };
 
-use anyhow::ensure;
 use log::{error, info};
 mod config;
 mod container;

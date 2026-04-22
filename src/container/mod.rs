@@ -2,17 +2,17 @@ mod env;
 mod ignore;
 mod volume;
 
-use std::{
-    env::current_dir, os::unix::process::CommandExt, path::PathBuf, process::Command, str::FromStr,
-};
+use std::{os::unix::process::CommandExt, path::PathBuf, process::Command, str::FromStr};
 
-use anyhow::{Result, anyhow, ensure};
+use anyhow::Result;
 use log::info;
-use serde::de::IntoDeserializer;
 
 use crate::{
     config::Config,
-    container::{ignore::parse_ignore_rule_set, volume::volume_mappings_by_ignore_rule_sets},
+    container::{
+        env::security_token_env, ignore::parse_ignore_rule_set,
+        volume::volume_mappings_by_ignore_rule_sets,
+    },
 };
 
 pub struct Container<'a> {
@@ -54,6 +54,13 @@ impl<'a> Container<'a> {
     }
 
     pub fn start(&self) -> Result<()> {
+        let environment_records = [{
+            if let Ok(macos_security_token) = security_token_env() {
+                macos_security_token
+            } else {
+                None
+            }
+        }];
         info!("Starting Claudestine...");
         let mappings = volume_mappings_by_ignore_rule_sets(
             self.config
@@ -79,6 +86,11 @@ impl<'a> Container<'a> {
             .arg("--tty")
             .arg("--env")
             .arg("TERM=xterm-256color");
+        for environment_mapping in environment_records.iter().flatten() {
+            command_builder
+                .arg("--environment")
+                .arg(environment_mapping.serialize());
+        }
         for rule in mappings {
             let arg = rule.serialize();
             command_builder.arg("--volume").arg(arg.as_str());

@@ -3,10 +3,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::container::{
-    self,
-    ignore::{IgnoreRule, IgnoreRuleSet},
-};
+use crate::container::ignore::{IgnoreRule, IgnoreRuleSet};
 
 pub struct VolumeMapping {
     source: Option<PathBuf>,
