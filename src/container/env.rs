@@ -53,6 +53,8 @@ pub fn security_token_env<'a>() -> Result<Option<EnvRecord<'a>>> {
             "-s",
             "\"Claude Code-credentials\"",
             "-w",
+            "||",
+            "5",
         ])
         .output()?;
 
