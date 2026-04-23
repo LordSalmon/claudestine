@@ -59,6 +59,12 @@ impl Config {
         }
     }
 
+    pub fn ignore_files(&self) -> Vec<String> {
+        let mut ignore_files = self.ignore_files.clone();
+        ignore_files.push(Self::default_isolates_path().to_str().unwrap().to_string());
+        ignore_files
+    }
+
     pub fn init() -> Result<Self> {
         let config = Self::get();
         ensure!(

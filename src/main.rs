@@ -6,6 +6,7 @@ use std::{
 use log::{error, info};
 mod config;
 mod container;
+mod setup;
 
 use clap::{Parser, Subcommand};
 
@@ -32,6 +33,7 @@ enum Command {
         #[arg(long, default_value_t = false)]
         force: bool,
     },
+    Setup {},
 }
 
 #[derive(Subcommand)]
@@ -100,6 +102,15 @@ fn main() {
                 info!("Claudestine successfully initialized.")
             } else {
                 error!("Couldn't read the current directories name");
+            }
+        }
+        Command::Setup {} => {
+            info!("Setting up Claudestine...");
+            if let Err(e) = setup::setup() {
+                error!("Couldn't setup Claudestine");
+                error!("{:?}", e);
+            } else {
+                info!("Claudestine is set up!");
             }
         }
     }
