@@ -47,25 +47,6 @@ pub struct ClaudeCredentials {
     claude_ai_oauth: ClaudeOAuth,
 }
 
-#[cfg(target_os = "linux")]
-pub fn security_token_env<'a>() -> Option<EnvRecord<'a>> {
-    None
-}
-
-#[cfg(target_os = "macos")]
-pub fn security_token_env<'a>() -> Option<EnvRecord<'a>> {
-    if let Ok(Some(credentials)) = credentials_record() {
-        Ok(Some(EnvRecord {
-            name: "CLAUDE_CODE_OAUTH_TOKEN",
-            host: HostEnvVariable::Value {
-                value: parsed_oauth_credentials.claude_ai_oauth.access_token,
-            },
-        }))
-    } else {
-        None
-    }
-}
-
 #[cfg(target_os = "macos")]
 pub fn credentials_record() -> Result<Option<ClaudeCredentials>> {
     let output = Command::new("security")

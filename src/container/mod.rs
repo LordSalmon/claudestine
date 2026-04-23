@@ -10,7 +10,7 @@ use log::info;
 use crate::{
     config::Config,
     container::{
-        env::security_token_env,
+        env::EnvRecord,
         ignore::parse_ignore_rule_set,
         volume::{claudestine_config_mapping, volume_mappings_by_ignore_rule_sets},
     },
@@ -55,7 +55,7 @@ impl<'a> Container<'a> {
     }
 
     pub fn start(&self) -> Result<()> {
-        let environment_records = [{ security_token_env() }];
+        let environment_records: [Option<EnvRecord>; 0] = [];
         info!("Starting Claudestine...");
         let mut mappings = volume_mappings_by_ignore_rule_sets(
             self.config
