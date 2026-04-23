@@ -10,8 +10,9 @@ use log::info;
 use crate::{
     config::Config,
     container::{
-        env::security_token_env, ignore::parse_ignore_rule_set,
-        volume::volume_mappings_by_ignore_rule_sets,
+        env::security_token_env,
+        ignore::parse_ignore_rule_set,
+        volume::{claudestine_config_mapping, volume_mappings_by_ignore_rule_sets},
     },
 };
 
@@ -54,33 +55,16 @@ impl<'a> Container<'a> {
     }
 
     pub fn start(&self) -> Result<()> {
-        let environment_records = [{
-            if let Ok(macos_security_token) = security_token_env() {
-                macos_security_token
-            } else {
-                None
-            }
-        }];
-        if let Some(o) = security_token_env().unwrap() {
-            dbg!(o.serialize());
-        }
+        let environment_records = [{ security_token_env() }];
         info!("Starting Claudestine...");
-        let mappings = volume_mappings_by_ignore_rule_sets(
+        let mut mappings = volume_mappings_by_ignore_rule_sets(
             self.config
                 .ignore_files
                 .iter()
-                .chain(
-                    Some(
-                        &Config::default_isolates_path()
-                            .to_str()
-                            .unwrap()
-                            .to_string(),
-                    )
-                    .into_iter(),
-                )
                 .map(|i| parse_ignore_rule_set(PathBuf::from_str(i).unwrap()))
                 .collect(),
         );
+        mappings.push(claudestine_config_mapping());
         let mut command_builder = Command::new("docker");
         command_builder
             .arg("run")

@@ -104,6 +104,13 @@ fn claude_config_file_mapping() -> Option<VolumeMapping> {
     }
 }
 
+pub fn claudestine_config_mapping() -> VolumeMapping {
+    VolumeMapping {
+        source: None,
+        destination: workdir().join(".claudestine"),
+    }
+}
+
 fn container_user_dir() -> PathBuf {
     Path::new("/root").to_path_buf()
 }
