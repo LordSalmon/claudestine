@@ -27,7 +27,7 @@ impl<'a> Container<'a> {
     }
 
     pub fn build(&self) -> Result<()> {
-        info!("Building Dockerfile...");
+        info!("Building Dockerfile. This may take a while...");
         let build_command = Command::new("docker")
             .arg("build")
             .args([

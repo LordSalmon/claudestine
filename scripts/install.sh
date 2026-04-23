@@ -55,7 +55,21 @@ main() {
 
     echo "Installed to $INSTALL_DIR/$BINARY_NAME"
 
-    if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
+    local needs_path=false
+    case "$os" in
+        macos)
+            if ! grep -qsF '.local/bin' "$HOME/.zprofile" 2>/dev/null; then
+                needs_path=true
+            fi
+            ;;
+        linux)
+            if ! grep -qsF '.local/bin' "$HOME/.bashrc" 2>/dev/null; then
+                needs_path=true
+            fi
+            ;;
+    esac
+
+    if $needs_path; then
         echo ""
         echo "$INSTALL_DIR is not in your PATH. To add it, run:"
         echo ""

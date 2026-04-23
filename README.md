@@ -37,7 +37,9 @@ This creates a new folder `.claudestine` in which you can find `config.toml`, `D
 `Dockerfile` is the setup for the environment Claude Code will run in. In there you should:
 
 - Install languages you are using for in process syntax check and linting
--
+- Install tools claude code may be using
+
+`isolates` is an file where you can specify the files and directories which Claude Code shouldn't be able to read. In most cases, you can just copy and paste your `.gitignore` file contents here but there may be exceptions.
 
 ## Notes
 
