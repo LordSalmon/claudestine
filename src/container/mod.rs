@@ -59,7 +59,7 @@ impl<'a> Container<'a> {
         info!("Starting Claudestine...");
         let mut mappings = volume_mappings_by_ignore_rule_sets(
             self.config
-                .ignore_files
+                .ignore_files()
                 .iter()
                 .map(|i| parse_ignore_rule_set(PathBuf::from_str(i).unwrap()))
                 .collect(),
