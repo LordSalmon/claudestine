@@ -40,9 +40,11 @@ enum Command {
         debug: bool,
     },
     Cleanup {},
-    Update {},
+    Update {
+        #[arg(long, default_value_t = false)]
+        debug: bool,
+    },
 }
-
 #[derive(Subcommand)]
 enum ConfigCommand {
     Show {},
@@ -130,14 +132,22 @@ fn main() {
                 info!("Claudestine is set up!");
             }
         }
-        Command::Update {} => {
+        Command::Update { debug } => {
             info!("Updating Claudestine...");
             let install_script =
                 "https://raw.githubusercontent.com/LordSalmon/claudestine/main/scripts/install.sh";
             let status = std::process::Command::new("sh")
                 .args(["-c", &format!("curl -fsSL '{}' | sh", install_script)])
-                .stdout(std::process::Stdio::null())
-                .stderr(std::process::Stdio::null())
+                .stdout(if debug {
+                    std::process::Stdio::inherit()
+                } else {
+                    std::process::Stdio::null()
+                })
+                .stderr(if debug {
+                    std::process::Stdio::inherit()
+                } else {
+                    std::process::Stdio::null()
+                })
                 .status()
                 .expect("Failed to run update script");
             if status.success() {
