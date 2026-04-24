@@ -28,28 +28,21 @@ impl<'a> Container<'a> {
 
     pub fn build(&self) -> Result<()> {
         info!("Building Dockerfile. This may take a while...");
-        let build_command = Command::new("docker")
-            .arg("build")
-            .args([
-                "-f",
-                format!("{}", self.config.dockerfile_path().display()).as_str(),
-                "-t",
-                self.image_name().as_str(),
-                ".",
-            ])
-            .output()
-            .expect("Failed to run docker build");
-
+        let mut command = Command::new("docker");
+        command.args([
+            "build",
+            "-f",
+            format!("{}", self.config.dockerfile_path().display()).as_str(),
+            "-t",
+            self.image_name().as_str(),
+            ".",
+        ]);
         if self.debug {
-            String::from_utf8_lossy(&build_command.stdout)
-                .lines()
-                .filter(|l| !l.trim().is_empty())
-                .for_each(|l| info!("{}", l));
-            String::from_utf8_lossy(&build_command.stderr)
-                .lines()
-                .filter(|l| !l.trim().is_empty())
-                .for_each(|l| info!("{}", l));
+            command.status().expect("Failed to run docker build");
+        } else {
+            command.output()?;
         }
+
         info!("Built Dockerfile");
         Ok(())
     }
