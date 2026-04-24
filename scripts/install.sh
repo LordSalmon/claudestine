@@ -50,8 +50,11 @@ main() {
 
     echo "Downloading $asset_name..."
     mkdir -p "$INSTALL_DIR"
-    curl -fsSL "$download_url" -o "$INSTALL_DIR/$BINARY_NAME"
-    chmod +x "$INSTALL_DIR/$BINARY_NAME"
+    local tmp_file
+    tmp_file=$(mktemp)
+    curl -fsSL "$download_url" -o "$tmp_file"
+    chmod +x "$tmp_file"
+    mv "$tmp_file" "$INSTALL_DIR/$BINARY_NAME"
 
     echo "Installed to $INSTALL_DIR/$BINARY_NAME"
 
