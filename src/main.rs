@@ -5,6 +5,7 @@ use std::{
 };
 
 use log::{error, info};
+mod broker;
 mod config;
 mod container;
 mod setup;
@@ -41,6 +42,16 @@ enum Command {
     },
     Cleanup {},
     Update {},
+    Broker {
+        #[command(subcommand)]
+        command: BrokerCommand,
+    },
+}
+
+#[derive(Subcommand)]
+enum BrokerCommand {
+    /// List all broker commands defined in config.toml
+    List {},
 }
 
 #[derive(Subcommand)]
@@ -91,7 +102,19 @@ fn main() {
                 fs::write(
                     Config::config_file_path(),
                     format!(
-                        "workspace_identifier = \"{}\"\nignore_files = []",
+                        concat!(
+                            "workspace_identifier = \"{}\"\n",
+                            "ignore_files = []\n",
+                            "\n",
+                            "# [broker]\n",
+                            "# enabled = true\n",
+                            "#\n",
+                            "# [[broker.commands]]\n",
+                            "# name = \"open_browser\"\n",
+                            "# description = \"Open a URL in the host browser\"\n",
+                            "# args = [{{ name = \"url\", type = \"string\", required = true }}]\n",
+                            "# invoke = \"open ${{url}}\"\n",
+                        ),
                         project_identifier.to_str().unwrap()
                     ),
                 )
@@ -146,6 +169,32 @@ fn main() {
                 error!("Update failed");
             }
         }
+        Command::Broker { command } => match command {
+            BrokerCommand::List {} => match Config::init() {
+                Err(e) => error!("{}", e),
+                Ok(config) => match &config.broker {
+                    None => info!("No [broker] section in config.toml."),
+                    Some(broker) if broker.commands.is_empty() => {
+                        info!("Broker is enabled but no commands are defined.")
+                    }
+                    Some(broker) => {
+                        for cmd in &broker.commands {
+                            let desc = cmd.description.as_deref().unwrap_or("(no description)");
+                            info!("{}: {}", cmd.name, desc);
+                            for arg in &cmd.args {
+                                let req = if arg.required { "required" } else { "optional" };
+                                let def = arg
+                                    .default
+                                    .as_deref()
+                                    .map(|d| format!(", default={d}"))
+                                    .unwrap_or_default();
+                                info!("  {} ({}{def})", arg.name, req);
+                            }
+                        }
+                    }
+                },
+            },
+        },
         Command::Cleanup {} => {
             let version = env!("CARGO_PKG_VERSION");
             let in_use: std::collections::HashSet<String> = {

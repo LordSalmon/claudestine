@@ -9,11 +9,43 @@ use anyhow::{Result, ensure};
 use log::{debug, error, info};
 use serde::Deserialize;
 
+#[derive(Debug, Clone, Deserialize)]
+pub struct BrokerArgDef {
+    pub name: String,
+    #[serde(rename = "type", default = "default_arg_type")]
+    pub type_name: String,
+    #[serde(default)]
+    pub required: bool,
+    pub default: Option<String>,
+}
+
+fn default_arg_type() -> String {
+    "string".to_string()
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct BrokerCommandDef {
+    pub name: String,
+    pub description: Option<String>,
+    #[serde(default)]
+    pub args: Vec<BrokerArgDef>,
+    pub invoke: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct BrokerConfig {
+    #[serde(default)]
+    pub enabled: bool,
+    #[serde(default)]
+    pub commands: Vec<BrokerCommandDef>,
+}
+
 #[derive(Debug, Deserialize)]
 pub struct Config {
     pub workspace_identifier: String,
     pub ignore_files: Vec<String>,
     dockerfile_path: Option<String>,
+    pub broker: Option<BrokerConfig>,
 }
 
 impl Config {
@@ -56,6 +88,7 @@ impl Config {
             workspace_identifier: current_folder,
             dockerfile_path: None,
             ignore_files: Vec::new(),
+            broker: None,
         }
     }
 

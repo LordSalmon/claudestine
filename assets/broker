@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+# Claudestine broker client — invoke host-side commands from inside the container.
+# Injected by claudestine at runtime; do not edit by hand.
+set -euo pipefail
+
+BROKER_HOST="${BROKER_HOST:-host.docker.internal}"
+
+if [[ -z "${BROKER_PORT:-}" ]]; then
+    echo "broker: BROKER_PORT is not set — is broker enabled in .claudestine/config.toml?" >&2
+    exit 1
+fi
+
+# ---------------------------------------------------------------------------
+# JSON helpers
+# ---------------------------------------------------------------------------
+
+json_escape() {
+    local s="$1"
+    s="${s//\\/\\\\}"
+    s="${s//\"/\\\"}"
+    s="${s//$'\n'/\\n}"
+    s="${s//$'\r'/\\r}"
+    s="${s//$'\t'/\\t}"
+    printf '%s' "$s"
+}
+
+build_payload() {
+    local command; command="$(json_escape "$1")"; shift
+    local args_json="{}"
+    if [[ $# -gt 0 ]]; then
+        local pairs="" key val
+        for kv in "$@"; do
+            key="$(json_escape "${kv%%=*}")"
+            val="$(json_escape "${kv#*=}")"
+            pairs+="\"${key}\":\"${val}\","
+        done
+        args_json="{${pairs%,}}"
+    fi
+    printf '{"command":"%s","args":%s}' "${command}" "${args_json}"
+}
+
+# ---------------------------------------------------------------------------
+# Transport
+# ---------------------------------------------------------------------------
+
+send() {
+    local payload="$1"
+    exec 3<>"/dev/tcp/${BROKER_HOST}/${BROKER_PORT}" 2>/dev/null || {
+        echo "broker: cannot reach host at ${BROKER_HOST}:${BROKER_PORT}" >&2
+        exit 1
+    }
+    printf '%s\n' "${payload}" >&3
+
+    local status_line exit_code
+    IFS= read -r status_line <&3
+    exit_code="${status_line#exit_code:}"
+
+    while IFS= read -r line <&3; do
+        printf '%s\n' "$line"
+    done
+
+    exec 3>&-
+    return "${exit_code:-0}"
+}
+
+# ---------------------------------------------------------------------------
+# Subcommands
+# ---------------------------------------------------------------------------
+
+usage() {
+    echo "Usage: broker call <command> [key=value ...]" >&2
+    echo "       broker list" >&2
+    exit 1
+}
+
+case "${1:-}" in
+    call)
+        [[ $# -ge 2 ]] || { echo "broker call: missing command name" >&2; usage; }
+        payload="$(build_payload "${@:2}")"
+        send "${payload}"
+        ;;
+    list)
+        send '{"command":"__list__","args":{}}'
+        ;;
+    *)
+        usage
+        ;;
+esac

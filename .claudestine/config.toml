@@ -1,2 +1,11 @@
 workspace_identifier = "claudestine"
 ignore_files = []
+
+[broker]
+enabled = true
+
+[[broker.commands]]
+name = "open_browser"
+description = "Open URL in the browser"
+args = [{name = "url", type = "string", required = true}]
+invoke = "open ${{url}}"

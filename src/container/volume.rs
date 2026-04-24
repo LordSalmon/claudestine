@@ -11,6 +11,10 @@ pub struct VolumeMapping {
 }
 
 impl VolumeMapping {
+    pub fn new(source: PathBuf, destination: PathBuf) -> Self {
+        Self { source: Some(source), destination }
+    }
+
     pub fn serialize(&self) -> String {
         if let Some(ref source) = self.source {
             format!("{}:{}", source.display(), self.destination.display())
