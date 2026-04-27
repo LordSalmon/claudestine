@@ -93,7 +93,7 @@ fn main() {
                 fs::write(
                     Config::config_file_path(),
                     format!(
-                        "workspace_identifier = \"{}\"\nignore_files = []",
+                        "workspace_identifier = \"{}\"\nignore_files = []\n",
                         project_identifier.to_str().unwrap()
                     ),
                 )
