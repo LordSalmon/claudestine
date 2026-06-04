@@ -1,7 +1,6 @@
 use std::{
     env::current_dir,
     fs::{self, create_dir, remove_dir_all},
-    process::ExitStatus,
 };
 
 use log::{error, info};
@@ -68,7 +67,7 @@ fn main() {
             if let Ok(config) = Config::init() {
                 info!("Welcome to claudestine!");
                 let container = Container::new(&config, debug);
-                if let Ok(()) = container.build() {
+                if let Ok(()) = container.build(false) {
                     container.start().unwrap()
                 } else {
                     error!("Couldn't build the container. Try running it with --debug");
@@ -116,7 +115,7 @@ fn main() {
         Command::Build { debug } => {
             if let Ok(config) = Config::init() {
                 let container = Container::new(&config, debug);
-                if let Err(e) = container.build() {
+                if let Err(e) = container.build(true) {
                     error!("Couldn't build the container: {}", e);
                 }
             } else {

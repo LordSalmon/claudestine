@@ -26,17 +26,22 @@ impl<'a> Container<'a> {
         Self { config, debug }
     }
 
-    pub fn build(&self) -> Result<()> {
+    pub fn build(&self, no_cache: bool) -> Result<()> {
         info!("Building Dockerfile. This may take a while...");
         let mut command = Command::new("docker");
-        command.args([
-            "build",
-            "-f",
-            format!("{}", self.config.dockerfile_path().display()).as_str(),
-            "-t",
-            self.image_name().as_str(),
-            ".",
-        ]);
+        command.args(
+            [
+                "build",
+                "--file",
+                format!("{}", self.config.dockerfile_path().display()).as_str(),
+                "--tag",
+                self.image_name().as_str(),
+                { if no_cache { "--no-cache" } else { "" } },
+                ".",
+            ]
+            .iter()
+            .filter(|e| !(**e).eq("")),
+        );
         if self.debug {
             command.status().expect("Failed to run docker build");
         } else {
